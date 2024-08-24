@@ -2,9 +2,10 @@
 
 # Import submodules to make them accessible when importing the package
 from .polytope import *
-from .geometry import *
+from .graham_scan import *
 from .mahler import *
 from .visualization import *
+from .polytope import Polytope
 
 # Define package-level constants
 VERSION = "1.0"
