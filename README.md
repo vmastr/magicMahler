@@ -1,4 +1,4 @@
-# MahlerMagic
+# magicMahler
 
 ## Features
 
@@ -19,4 +19,4 @@
 ## Installation 
 
 ```bash
-pip install MahlerMagic
+pip install magicMahler
