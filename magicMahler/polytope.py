@@ -1,5 +1,6 @@
 import numpy as np 
 import matplotlib.pyplot as plt
+from scipy import integrate
 
 
 class Polytope: 
@@ -47,7 +48,40 @@ class Polytope:
         # Implement code that finds the Lp-Santalo point
         pass 
 
+    def exph1(self, x, y): 
+        vertices = self.vertices[:] # Make a copy of the vertices
+        vertices.append(vertices[0])
+        z = np.array([x, y])
+        exph1 = 0 
+        for i in range(len(self.vertices)): 
+            M = np.array([vertices[i], vertices[i+1]]).T
+            xi = M.T.dot(z)[0]
+            eta = M.T.dot(z)[1]
+            exph1 += np.linalg.det(M) * g(xi, eta)
+        return exph1/ self.volume() 
 
+    def M1(self):
+        prec = 50  # precision of integration
+        def G(x,y):
+            return 1/(self.exph1(x, y))
+        L1polar = integrate.dblquad(G, -prec, prec, -prec, prec)
+        return L1polar[0] * self.volume()
+
+
+# some auxiliary functions
+def f(x): 
+    if x != 0: 
+        return (np.exp(x) - 1)/x 
+    else: 
+        return 1
+
+def g(x,y): 
+    if x != y:
+        return (f(x) - f(y))/(x-y)
+    elif x == y and x != 0:
+        return (1/x) * (np.exp(x) - f(x))
+    else:
+        return 1/2
 
 
 
@@ -60,7 +94,16 @@ triangle = Polytope([(1,1), (-1, 0), (0, -1)])
 # print(triangle.vertices)
 # triangle.plot()
 # print(triangle.polar().vertices)
+# print(triangle.exph1(0,0))
+# print(triangle.M1())
 
 
+# Reality check for exph1 of the square
+square = Polytope([[1,1], [-1,1], [-1,-1], [1,-1]])
 
+# def exph1sq(x,y): 
+#     return (f(x)+f(-x)) * (f(y)+f(-y)) / 4
 
+# print(exph1sq(2,3))
+# print(square.exph1(2,3))
+print(square.M1())
