@@ -1,5 +1,11 @@
+import unittest
 from magicMahler.polytope import Polytope
 
+class TestPolytope(unittest.TestCase):
+    def test_some_method(self):
+        p = Polytope()
+        self.assertEqual(p.some_method(), "Hello from Polytope")
 
-triangle = Polytope([(1,1), (-1, 0), (0, -1)])
-print(triangle.volume())
+
+if __name__ == "__main__":
+    unittest.main()

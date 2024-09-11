@@ -1,109 +1,212 @@
-import numpy as np 
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy import integrate
 
 
-class Polytope: 
+class Polytope:
+    """A class representing a polytope defined by its vertices."""
 
-    def __init__(self, vertices): 
-        self.vertices = vertices 
-    
-    def volume(self): 
-        # Must be counter clock-wise oriented polygon
-        """Compute the volume of the polytope"""
+    def __init__(self, vertices):
+        """
+        Initialize the polytope with a list of vertices.
+
+        Args:
+            vertices (list of tuples): List of (x, y) tuples representing vertices.
+        """
+        self.vertices = vertices
+
+    def volume(self):
+        """
+        Compute the area (volume in 2D) of the polytope using the Shoelace formula.
+
+        Returns:
+            float: The computed area of the polytope.
+        """
         vertices = self.vertices[:]
-        vertices.append(vertices[0]) #repeat the first point to create a 'closed loop'
-        xs, ys = zip(*vertices) #create lists of x and y values
-        volume = 0
-        for i in range(len(self.vertices)):
-            L = (1/2) * (xs[i] * ys[i+1] - xs[i+1] * ys[i]) # volume of triangle
-            volume += L
-        return volume
-    
+        vertices.append(vertices[0])  # Repeat the first point to close the loop
+        xs, ys = zip(*vertices)
+        volume = 0.5 * sum(xs[i] * ys[i + 1] - xs[i + 1] * ys[i] for i in range(len(self.vertices)))
+        return abs(volume)
+
     def plot(self):
+        """Plot the polytope using matplotlib."""
         vertices = self.vertices[:]
         vertices.append(vertices[0])
-        xs, ys = zip(*vertices) #create lists of x and y values
+        xs, ys = zip(*vertices)
         plt.figure()
-        plt.plot(xs,ys) 
+        plt.plot(xs, ys)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Polytope Plot')
         plt.show()
 
-    def polar(self): 
+    def polar(self):
+        """
+        Compute the polar polytope.
+
+        Returns:
+            Polytope: The polar polytope as a new Polytope object.
+        """
         vertices = self.vertices[:]
         vertices.append(vertices[0])
         polar_polytope = []
         xs, ys = zip(*vertices)
-        for i in range(len(self.vertices)): 
-            L = xs[i] * ys[i+1] - xs[i+1] * ys[i]
-            polar_x = (ys[i+1] - ys[i])/ L
-            polar_y = (xs[i] - xs[i+1])/ L
+        for i in range(len(self.vertices)):
+            L = xs[i] * ys[i + 1] - xs[i + 1] * ys[i]
+            if L == 0:
+                continue  # Avoid division by zero
+            polar_x = (ys[i + 1] - ys[i]) / L
+            polar_y = (xs[i] - xs[i + 1]) / L
             polar_polytope.append((polar_x, polar_y))
         return Polytope(polar_polytope)
+    
+    def Mahler(self):    
+        """
+        Compute the Mahler volume of the polytope. 
 
+        """
+        return 2 * self.volume() * self.polar().volume()
+    
     def barycenter(self):
-        # Implement code that computes the barycenter 
-        pass
+        """
+        Compute the barycenter (centroid) of a convex polygon in 2D.
+
+        Args:
+            vertices (list of tuples): List of (x, y) tuples representing the vertices of the polygon in counterclockwise order.
+
+        Returns:
+            tuple: The (x, y) coordinates of the barycenter.
+        """
+        # Close the polygon by appending the first vertex at the end
+        vertices = self.vertices
+        vertices.append(vertices[0])
+
+        # Number of vertices
+        n = len(vertices) - 1
+
+        # Initialize area and barycenter coordinates
+        A = self.volume()
+        C_x = 0
+        C_y = 0
+
+        # Compute barycenter coordinates using the formulas
+        for i in range(n):
+            x_i, y_i = vertices[i]
+            x_ip1, y_ip1 = vertices[i + 1]
+            # Compute the cross product and area
+            cross_product = x_i * y_ip1 - x_ip1 * y_i
+            # Compute the centroid coordinates
+            C_x += (x_i + x_ip1) * cross_product
+            C_y += (y_i + y_ip1) * cross_product
+
+        # Finalize the area and barycenter coordinates
+        C_x /= (6 * A)
+        C_y /= (6 * A)
+
+        return (C_x, C_y)
 
     def SantaloPoint(p, self): 
         # Implement code that finds the Lp-Santalo point
         pass 
 
-    def exph1(self, x, y): 
-        vertices = self.vertices[:] # Make a copy of the vertices
+    def exph1(self, x, y):
+        """
+        Compute the exponential function h1 of the polytope.
+
+        Args:
+            x (float): x-coordinate.
+            y (float): y-coordinate.
+
+        Returns:
+            float: The computed exponential value.
+        """
+        vertices = self.vertices[:]
         vertices.append(vertices[0])
         z = np.array([x, y])
-        exph1 = 0 
-        for i in range(len(self.vertices)): 
-            M = np.array([vertices[i], vertices[i+1]]).T
-            xi = M.T.dot(z)[0]
-            eta = M.T.dot(z)[1]
+        exph1 = 0
+        for i in range(len(self.vertices)):
+            M = np.array([vertices[i], vertices[i + 1]]).T
+            xi, eta = M.T @ z
             exph1 += np.linalg.det(M) * g(xi, eta)
-        return exph1/ self.volume() 
+        return exph1 / self.volume()
 
     def M1(self):
+        """
+        Compute the L1-Mahler volume of the polytope.
+
+        Returns:
+            float: The computed M1 volume.
+        """
         prec = 50  # precision of integration
-        def G(x,y):
-            return 1/(self.exph1(x, y))
-        L1polar = integrate.dblquad(G, -prec, prec, -prec, prec)
+
+        def G(x, y):
+            return 1 / (self.exph1(x, y))
+
+        L1polar = integrate.dblquad(G, -prec, prec, lambda _: -prec, lambda _: prec)
         return L1polar[0] * self.volume()
 
+    def exph(self, p, x, y):
+        """Compute the exponential Lp-support function of the polytope."""
+        return (self.exph1(p * x, p * y)) ** (1 / p)
 
-# some auxiliary functions
-def f(x): 
-    if x != 0: 
-        return (np.exp(x) - 1)/x 
-    else: 
-        return 1
+    def h(self, p, x, y):
+        """Compute the Lp-support function of the polytope."""
+        return np.log(self.exph(p, x, y))
 
-def g(x,y): 
+    def M(self, p):
+        """
+        Compute the Mp volume for the polytope.
+
+        Args:
+            p (float): The exponent parameter p, or 
+            p = "inf": for the classical Mahler volume.
+
+        Returns:
+            float: The computed Lp-Mahler volume.
+        """
+
+        if p == "inf": 
+            return self.Mahler()
+        
+        else: 
+            prec = 50  # precision of integration
+
+            def G(x, y):
+                return 1 / (self.exph(p, x, y))
+
+            Lppolar = integrate.dblquad(G, -prec, prec, lambda _: -prec, lambda _: prec)
+            return Lppolar[0] * self.volume()
+
+    def Cov(self): 
+        pass 
+
+    def isotropic(self):
+        pass 
+
+# Auxiliary functions
+def f(x):
+    return (np.exp(x) - 1) / x if x != 0 else 1
+
+
+def g(x, y):
     if x != y:
-        return (f(x) - f(y))/(x-y)
+        return (f(x) - f(y)) / (x - y)
     elif x == y and x != 0:
-        return (1/x) * (np.exp(x) - f(x))
+        return (1 / x) * (np.exp(x) - f(x))
     else:
-        return 1/2
+        return 1 / 2
 
 
+# Testing
+if __name__ == "__main__":
+    simplex = Polytope([(0,0), (1,0), (0,1)])
+    triangle = Polytope([(1, 1), (-1, 0), (0, -1)])
+    print("Triangle Volume:", triangle.volume())
+    triangle.plot()
 
-
-
-# TESTING 
-  
-triangle = Polytope([(1,1), (-1, 0), (0, -1)])
-# print(triangle.volume())
-# print(triangle.vertices)
-# triangle.plot()
-# print(triangle.polar().vertices)
-# print(triangle.exph1(0,0))
-# print(triangle.M1())
-
-
-# Reality check for exph1 of the square
-square = Polytope([[1,1], [-1,1], [-1,-1], [1,-1]])
-
-# def exph1sq(x,y): 
-#     return (f(x)+f(-x)) * (f(y)+f(-y)) / 4
-
-# print(exph1sq(2,3))
-# print(square.exph1(2,3))
-print(square.M1())
+    square = Polytope([[1, 1], [-1, 1], [-1, -1], [1, -1]])
+    print("Square M(1):", square.M(1))
+    print("Square M(5):", square.M(5))
+    print("Square Mahler volume:", square.Mahler())
+    print("Square Mahler volume:", square.M("inf"))
+    print("Barycenter:", triangle.barycenter(), simplex.barycenter())
