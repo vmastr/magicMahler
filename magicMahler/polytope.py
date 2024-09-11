@@ -78,7 +78,7 @@ class Polytope:
             tuple: The (x, y) coordinates of the barycenter.
         """
         # Close the polygon by appending the first vertex at the end
-        vertices = self.vertices
+        vertices = self.vertices[:]
         vertices.append(vertices[0])
 
         # Number of vertices
@@ -178,10 +178,73 @@ class Polytope:
             return Lppolar[0] * self.volume()
 
     def Cov(self): 
-        pass 
+        """
+        Compute the covariance matrix of a convex polygon in 2D.
+
+        Returns:
+            np.ndarray: The 2-by-2 covariance matrix of the polygon.
+        """
+        # Make a copy of vertices and close the polygon by appending the first vertex at the end
+        vertices = self.vertices[:]
+        vertices.append(vertices[0])
+
+        # Number of vertices
+        n = len(vertices) - 1
+
+        # Initialize second moments
+        A = self.volume()
+        I_xx = 0
+        I_xy = 0
+        I_yy = 0
+
+        # Compute the second moments using shoelace formulas
+        for i in range(n):
+            x_i, y_i = vertices[i]
+            x_ip1, y_ip1 = vertices[i + 1]
+            
+            # Compute the cross product
+            cross_product = x_i * y_ip1 - x_ip1 * y_i
+            
+            # Compute the second moments
+            I_xx += (x_i**2 + x_i * x_ip1 + x_ip1**2) * cross_product
+            I_xy += (x_i * y_ip1 + 2 * x_i * y_i + 2 * x_ip1 * y_ip1 + x_ip1 * y_i) * cross_product
+            I_yy += (y_i**2 + y_i * y_ip1 + y_ip1**2) * cross_product
+
+        # Normalize the second moments by the area
+        I_xx /= (12 * A)
+        I_xy /= (24 * A)
+        I_yy /= (12 * A)
+
+        # Compute barycenter once to avoid redundant calls
+        b_x, b_y = self.barycenter()
+
+        # Define the covariance matrix components
+        C_xx = I_xx - b_x**2 
+        C_xy = I_xy - b_x * b_y
+        C_yy = I_yy - b_y**2
+
+        return np.array([[C_xx, C_xy], [C_xy, C_yy]])
 
     def isotropic(self):
-        pass 
+        """
+        Compute the isotropic constant of the convex polygon.
+        
+        Returns:
+            float: The isotropic constant of the polygon.
+        """
+        # Calculate the covariance matrix
+        cov_matrix = self.Cov()
+
+        # Compute the determinant of the covariance matrix
+        det_cov = np.linalg.det(cov_matrix)
+
+        # Compute the volume (area) of the convex polygon
+        volume = self.volume()
+
+        # Calculate the isotropic constant using the formula
+        L_K = (det_cov ** (1/4)) / (volume ** 0.5)
+
+        return L_K
 
 # Auxiliary functions
 def f(x):
@@ -210,3 +273,5 @@ if __name__ == "__main__":
     print("Square Mahler volume:", square.Mahler())
     print("Square Mahler volume:", square.M("inf"))
     print("Barycenter:", triangle.barycenter(), simplex.barycenter())
+    print("Covariance matrix:", triangle.Cov())
+    print("Isotropic constant:", simplex.isotropic(), square.isotropic())
