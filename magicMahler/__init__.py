@@ -1,6 +1,7 @@
 # MahlerMagic/__init__.py
 
 # Import submodules to make them accessible when importing the package
+from auxiliary_functions import *
 from .polytope import *
 from .graham_scan import *
 from .mahler import *

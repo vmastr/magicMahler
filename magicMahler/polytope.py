@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import integrate
+from auxiliary_functions import aux1, aux2, numerical_gradient, gradient_descent
 
 
 class Polytope:
@@ -105,9 +106,42 @@ class Polytope:
 
         return (C_x, C_y)
 
-    def SantaloPoint(p, self): 
-        # Implement code that finds the Lp-Santalo point
-        pass 
+    def translate(self, x, y):
+        """
+        Translate the polytope by a given vector (x, y).
+
+        Args:
+            x (float): The amount to translate in the x-direction.
+            y (float): The amount to translate in the y-direction.
+
+        Returns:
+            list of tuples: A new list of vertices representing the translated polytope.
+        """
+        vertices = self.vertices[:] # make a copy of the vertices
+        translatedP = []  
+        for i in range(len(vertices)):
+            translatedP.append((vertices[i][0]- x, vertices[i][1] - y))
+        return Polytope(translatedP)
+
+
+    def SantaloPoint(self, p="inf"): 
+        # Step 1: Define the function M(p, P - (x, y))
+        def F(x,y):
+            return self.translate(x, y).M(p)
+
+        # Step 2: Select the initial point
+        n = len(self.vertices)
+        x_avg = sum(x for x, y in self.vertices) / n
+        y_avg = sum(y for x, y in self.vertices) / n
+
+        initial_point = (x_avg, y_avg)
+
+        # Step 2: Run Gradient Descent
+        result_x, result_y, min_value = gradient_descent(F, initial_point)
+
+        return result_x, result_y
+
+
 
     def exph1(self, x, y):
         """
@@ -127,7 +161,7 @@ class Polytope:
         for i in range(len(self.vertices)):
             M = np.array([vertices[i], vertices[i + 1]]).T
             xi, eta = M.T @ z
-            exph1 += np.linalg.det(M) * g(xi, eta)
+            exph1 += np.linalg.det(M) * aux2(xi, eta)
         return exph1 / self.volume()
 
     def M1(self):
@@ -153,7 +187,7 @@ class Polytope:
         """Compute the Lp-support function of the polytope."""
         return np.log(self.exph(p, x, y))
 
-    def M(self, p):
+    def M(self, p="inf"):
         """
         Compute the Mp volume for the polytope.
 
@@ -246,18 +280,6 @@ class Polytope:
 
         return L_K
 
-# Auxiliary functions
-def f(x):
-    return (np.exp(x) - 1) / x if x != 0 else 1
-
-
-def g(x, y):
-    if x != y:
-        return (f(x) - f(y)) / (x - y)
-    elif x == y and x != 0:
-        return (1 / x) * (np.exp(x) - f(x))
-    else:
-        return 1 / 2
 
 
 # Testing
@@ -271,7 +293,13 @@ if __name__ == "__main__":
     print("Square M(1):", square.M(1))
     print("Square M(5):", square.M(5))
     print("Square Mahler volume:", square.Mahler())
-    print("Square Mahler volume:", square.M("inf"))
-    print("Barycenter:", triangle.barycenter(), simplex.barycenter())
-    print("Covariance matrix:", triangle.Cov())
-    print("Isotropic constant:", simplex.isotropic(), square.isotropic())
+    # print("Square Mahler volume:", square.M("inf"), square.M())
+    # print("Barycenter:", triangle.barycenter(), simplex.barycenter())
+    # print("Covariance matrix:", triangle.Cov())
+    # print("Isotropic constant:", simplex.isotropic(), square.isotropic())
+    # print("Translated simplex:", simplex.translate(1/3,1/3).vertices)
+    # print("M1 of translated square:", square.translate(1/2, 1/2).M(1))
+    # print("Santalo point of triangle:", triangle.SantaloPoint())
+    # print("Santalo point of simplex:", simplex.SantaloPoint())
+    # print("L1-Santalo point of translated square:", square.translate(1,1).SantaloPoint(1))
+    print("L1-Santalo point of triangle:", triangle.SantaloPoint(1))
