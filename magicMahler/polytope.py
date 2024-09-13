@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import integrate
-from auxiliary_functions import aux1, aux2, numerical_gradient, gradient_descent
+from auxiliary_functions import aux1, aux2, numerical_gradient, gradient_descent, safe_divide, double_integration 
 
 
 class Polytope:
@@ -143,26 +143,44 @@ class Polytope:
 
 
 
-    def exph1(self, x, y):
-        """
-        Compute the exponential function h1 of the polytope.
+    # def exph1(self, x, y):
+    #     """
+    #     Compute the exponential function h1 of the polytope.
 
-        Args:
-            x (float): x-coordinate.
-            y (float): y-coordinate.
+    #     Args:
+    #         x (float): x-coordinate.
+    #         y (float): y-coordinate.
 
-        Returns:
-            float: The computed exponential value.
-        """
-        vertices = self.vertices[:]
+    #     Returns:
+    #         float: The computed exponential value.
+    #     """
+    #     vertices = self.vertices[:]
+    #     vertices.append(vertices[0])
+    #     z = np.array([x, y])
+    #     exph1 = 0
+    #     for i in range(len(self.vertices)):
+    #         M = np.array([vertices[i], vertices[i + 1]]).T
+    #         xi, eta = M.T @ z
+    #         exph1 += np.linalg.det(M) * aux2(xi, eta)
+    #     return exph1 / self.volume()
+
+    def safe_exph1(self, x, y):
+        vertices = self.vertices[:]  # Make a copy of the vertices
         vertices.append(vertices[0])
         z = np.array([x, y])
         exph1 = 0
         for i in range(len(self.vertices)):
-            M = np.array([vertices[i], vertices[i + 1]]).T
-            xi, eta = M.T @ z
-            exph1 += np.linalg.det(M) * aux2(xi, eta)
-        return exph1 / self.volume()
+            M = np.array([vertices[i], vertices[i+1]]).T
+            xi = M.T.dot(z)[0]
+            eta = M.T.dot(z)[1]
+            
+            # Prevent overflow and handle invalid values
+            det_M = np.clip(np.linalg.det(M), -1e150, 1e150)  # Clip values to prevent overflow
+            g_val = np.clip(aux2(xi, eta), -1e150, 1e150)  # Also clip auxiliary function results
+            
+            exph1 += det_M * g_val
+
+        return exph1 / (self.volume() + 1e-10)  # Add epsilon to avoid division by zero
 
     def M1(self):
         """
@@ -171,17 +189,17 @@ class Polytope:
         Returns:
             float: The computed M1 volume.
         """
-        prec = 50  # precision of integration
+        prec = 30  # precision of integration
 
         def G(x, y):
-            return 1 / (self.exph1(x, y))
+            return safe_divide(1, self.safe_exph1(x,y))
 
-        L1polar = integrate.dblquad(G, -prec, prec, lambda _: -prec, lambda _: prec)
+        L1polar = double_integration(G, -prec, prec, lambda _: -prec, lambda _: prec)
         return L1polar[0] * self.volume()
 
     def exph(self, p, x, y):
         """Compute the exponential Lp-support function of the polytope."""
-        return (self.exph1(p * x, p * y)) ** (1 / p)
+        return (self.safe_exph1(p * x, p * y)) ** (1 / p)
 
     def h(self, p, x, y):
         """Compute the Lp-support function of the polytope."""
@@ -206,9 +224,9 @@ class Polytope:
             prec = 50  # precision of integration
 
             def G(x, y):
-                return 1 / (self.exph(p, x, y))
+                return safe_divide(1, self.exph(p, x, y))
 
-            Lppolar = integrate.dblquad(G, -prec, prec, lambda _: -prec, lambda _: prec)
+            Lppolar = double_integration(G, -prec, prec, lambda _: -prec, lambda _: prec)
             return Lppolar[0] * self.volume()
 
     def Cov(self): 
@@ -282,24 +300,47 @@ class Polytope:
 
 
 
-# Testing
-if __name__ == "__main__":
-    simplex = Polytope([(0,0), (1,0), (0,1)])
-    triangle = Polytope([(1, 1), (-1, 0), (0, -1)])
-    print("Triangle Volume:", triangle.volume())
-    triangle.plot()
+# # Testing
+# if __name__ == "__main__":
+#     simplex = Polytope([(0,0), (1,0), (0,1)])
+#     triangle = Polytope([(1, 1), (-1, 0), (0, -1)])
+#     # print("Triangle Volume:", triangle.volume())
+#     # triangle.plot()
 
-    square = Polytope([[1, 1], [-1, 1], [-1, -1], [1, -1]])
-    print("Square M(1):", square.M(1))
-    print("Square M(5):", square.M(5))
-    print("Square Mahler volume:", square.Mahler())
-    # print("Square Mahler volume:", square.M("inf"), square.M())
-    # print("Barycenter:", triangle.barycenter(), simplex.barycenter())
-    # print("Covariance matrix:", triangle.Cov())
-    # print("Isotropic constant:", simplex.isotropic(), square.isotropic())
-    # print("Translated simplex:", simplex.translate(1/3,1/3).vertices)
-    # print("M1 of translated square:", square.translate(1/2, 1/2).M(1))
-    # print("Santalo point of triangle:", triangle.SantaloPoint())
-    # print("Santalo point of simplex:", simplex.SantaloPoint())
-    # print("L1-Santalo point of translated square:", square.translate(1,1).SantaloPoint(1))
-    print("L1-Santalo point of triangle:", triangle.SantaloPoint(1))
+#     square = Polytope([[1, 1], [-1, 1], [-1, -1], [1, -1]])
+#     # print("Square M(1):", square.M(1))
+#     # print("Square M(5):", square.M(5))
+#     # print("Square Mahler volume:", square.Mahler())
+#     # print("Square Mahler volume:", square.M("inf"), square.M())
+#     # print("Barycenter:", triangle.barycenter(), simplex.barycenter())
+#     # print("Covariance matrix:", triangle.Cov())
+#     # print("Isotropic constant:", simplex.isotropic(), square.isotropic())
+#     # print("Translated simplex:", simplex.translate(1/3,1/3).vertices)
+#     # print("M1 of translated square:", square.translate(1/2, 1/2).M(1))
+#     # print("M1 of the simplex:", simplex.translate(.3,.3).M(1))
+#     # print("Santalo point of triangle:", triangle.SantaloPoint())
+#     # print("Santalo point of simplex:", simplex.SantaloPoint())
+#     # print("L1-Santalo point of translated square:", square.translate(1,1).SantaloPoint(1))
+#     # print("L1-Santalo point of triangle:", triangle.translate(.5,.5).SantaloPoint(1))
+#     print("L1-Santalo point of simplex:", simplex.SantaloPoint(1))
+
+
+# Gradient descent by hand 
+simplex = Polytope([(0,0), (1,0), (0,1)])
+learning_rate = .00001
+
+def D(x,y): 
+    return simplex.translate(x,y).M(1)
+
+x0, y0 = .4, .35
+D_old = D(x0, y0) 
+
+for i in range(100): 
+    grad = numerical_gradient(D, x0, y0)
+    x0 -= learning_rate * grad[0]
+    y0 -= learning_rate * grad[1]
+
+    D_new = D(x0, y0)
+    print(D_old, grad, x0, y0, D_new)    
+    D_old = D_new      
+ 
