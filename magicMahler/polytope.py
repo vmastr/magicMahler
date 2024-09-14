@@ -327,20 +327,41 @@ class Polytope:
 
 # Gradient descent by hand 
 simplex = Polytope([(0,0), (1,0), (0,1)])
-learning_rate = .00001
+learning_rate = .0001
 
 def D(x,y): 
     return simplex.translate(x,y).M(1)
 
 x0, y0 = .4, .35
 D_old = D(x0, y0) 
+grad = numerical_gradient(D, x0, y0)
+number_of_iterations = 0 
 
-for i in range(100): 
-    grad = numerical_gradient(D, x0, y0)
+
+while np.sqrt(grad[0]**2 + grad[1]**2) > 1e-3 and number_of_iterations < 1e3: 
+    number_of_iterations += 1
+
     x0 -= learning_rate * grad[0]
     y0 -= learning_rate * grad[1]
 
-    D_new = D(x0, y0)
-    print(D_old, grad, x0, y0, D_new)    
-    D_old = D_new      
+    grad = numerical_gradient(D, x0, y0)
+
+print("Number of iterations:", number_of_iterations)
+print("Minimum attained at: ", (x0, y0))
+print("Gradient at  that point: ", grad)
+print("Minimum value: ", D(x0, y0))
+
+    
+
+# for i in range(100): 
+#     grad = numerical_gradient(D, x0, y0)
+#     x0 -= learning_rate * grad[0]
+#     y0 -= learning_rate * grad[1]
+
+#     D_new = D(x0, y0)
+#     print(D_old, grad, x0, y0, D_new)    
+#     D_old = D_new      
+
+
+
  

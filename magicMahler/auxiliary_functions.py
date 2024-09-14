@@ -48,7 +48,7 @@ def numerical_gradient(f, x, y, h=1e-5):
     grad_y = (f(x, y + h) - f(x, y - h)) / (2 * h)
     return np.array([grad_x, grad_y])
 
-def gradient_descent(f, initial_point, learning_rate=1e-3, max_iterations=1000, tolerance=1e-7, threshold=1e-6):
+def gradient_descent(f, initial_point, learning_rate=1e-4, max_iterations=1000, tolerance=1e-4, threshold=1e-6):
     """Find the minimum of function f using gradient descent."""
     x, y = initial_point
     for i in range(max_iterations):
