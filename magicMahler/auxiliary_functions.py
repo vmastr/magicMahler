@@ -2,11 +2,21 @@ import numpy as np
 from scipy import integrate 
 
 def aux1(x):
+    """
+    Parameters: x.
+
+    Returns: (e^x - 1)/x.
+    """
     # Clip values of x to prevent overflow in np.exp()
     x = np.clip(x, -700, 700)  # Restrict x within the range [-700, 700]: Returns 700 or -700 for values not in the interval
     return (np.exp(x) - 1) / x if x != 0 else 1
 
 def aux2(x, y):
+    """
+    Patameters: x, y.
+
+    Returns ((e^x-1)/x - (e^y-1)/y) / (x-y).
+    """
     if np.isclose(x, y): 
         if np.isclose(x,0):
             return 1/2
