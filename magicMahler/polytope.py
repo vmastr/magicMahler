@@ -141,29 +141,6 @@ class Polytope:
 
         return result_x, result_y
 
-
-
-    # def exph1(self, x, y):
-    #     """
-    #     Compute the exponential function h1 of the polytope.
-
-    #     Args:
-    #         x (float): x-coordinate.
-    #         y (float): y-coordinate.
-
-    #     Returns:
-    #         float: The computed exponential value.
-    #     """
-    #     vertices = self.vertices[:]
-    #     vertices.append(vertices[0])
-    #     z = np.array([x, y])
-    #     exph1 = 0
-    #     for i in range(len(self.vertices)):
-    #         M = np.array([vertices[i], vertices[i + 1]]).T
-    #         xi, eta = M.T @ z
-    #         exph1 += np.linalg.det(M) * aux2(xi, eta)
-    #     return exph1 / self.volume()
-
     def safe_exph1(self, x, y):
         vertices = self.vertices[:]  # Make a copy of the vertices
         vertices.append(vertices[0])
@@ -330,26 +307,28 @@ simplex = Polytope([(0,0), (1,0), (0,1)])
 learning_rate = .0001
 
 def D(x,y): 
-    return simplex.translate(x,y).M(1)
+    return simplex.translate(x,y).M(2)
 
-x0, y0 = .4, .35
-D_old = D(x0, y0) 
-grad = numerical_gradient(D, x0, y0)
-number_of_iterations = 0 
+gradient_descent(D, (.4, .35))
+
+# x0, y0 = .4, .35
+# D_old = D(x0, y0) 
+# grad = numerical_gradient(D, x0, y0)
+# number_of_iterations = 0 
 
 
-while np.sqrt(grad[0]**2 + grad[1]**2) > 1e-3 and number_of_iterations < 1e3: 
-    number_of_iterations += 1
+# while np.sqrt(grad[0]**2 + grad[1]**2) > 1e-3 and number_of_iterations < 1e3: 
+#     number_of_iterations += 1
 
-    x0 -= learning_rate * grad[0]
-    y0 -= learning_rate * grad[1]
+#     x0 -= learning_rate * grad[0]
+#     y0 -= learning_rate * grad[1]
 
-    grad = numerical_gradient(D, x0, y0)
+#     grad = numerical_gradient(D, x0, y0)
 
-print("Number of iterations:", number_of_iterations)
-print("Minimum attained at: ", (x0, y0))
-print("Gradient at  that point: ", grad)
-print("Minimum value: ", D(x0, y0))
+# print("Number of iterations:", number_of_iterations)
+# print("Minimum attained at: ", (x0, y0))
+# print("Gradient at  that point: ", grad)
+# print("Minimum value: ", D(x0, y0))
 
     
 

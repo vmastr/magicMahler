@@ -1,4 +1,5 @@
 import numpy as np 
+from tqdm import tqdm
 from scipy import integrate 
 
 def aux1(x):
@@ -58,26 +59,37 @@ def numerical_gradient(f, x, y, h=1e-5):
     grad_y = (f(x, y + h) - f(x, y - h)) / (2 * h)
     return np.array([grad_x, grad_y])
 
-def gradient_descent(f, initial_point, learning_rate=1e-4, max_iterations=1000, tolerance=1e-4, threshold=1e-6):
+
+def gradient_descent(f, initial_point, learning_rate=1e-4, max_iterations=100, tolerance=1e-3, threshold=1e-6):
     """Find the minimum of function f using gradient descent."""
-    x, y = initial_point
-    for i in range(max_iterations):
-        grad = numerical_gradient(f, x, y)  # Compute gradient
-        x_new = x - learning_rate * grad[0]
-        y_new = y - learning_rate * grad[1]
-        
-        # Check for convergence
-        if np.linalg.norm(np.array([x_new, y_new]) - np.array([x, y])) < tolerance:
-            print(f"Converged in {i+1} iterations.")
-            break
-        
-        x, y = x_new, y_new  # Update the point
+    x0, y0 = initial_point
+    grad = numerical_gradient(f, x0, y0)
+    number_of_iterations = 0
+
+    # Initialize tqdm loading bar
+    with tqdm(total=max_iterations) as pbar:
+        while np.sqrt(grad[0]**2 + grad[1]**2) > tolerance and number_of_iterations < max_iterations:
+            number_of_iterations += 1
+
+            # Update the progress bar
+            pbar.update(1)
+
+            # Perform gradient descent step
+            x0 -= learning_rate * grad[0]
+            y0 -= learning_rate * grad[1]
+
+            grad = numerical_gradient(f, x0, y0)
 
     # Round small values to zero if they are below the threshold
-    x = round(x) if abs(x-round(x)) < threshold else x
-    y = round(y) if abs(y-round(y)) < threshold else y
+    x0 = round(x0) if abs(x0-round(x0)) < threshold else x0
+    y0 = round(y0) if abs(y0-round(y0)) < threshold else y0
 
-    return x, y, f(x, y)
+    print("Number of iterations:", number_of_iterations)
+    print("Minimum attained at: ", (x0, y0))
+    print("Gradient at that point: ", grad)
+    print("Minimum value: ", f(x0, y0))
+
+    # return x0, y0, f(x0, y0)
 
 
 # # TEST
