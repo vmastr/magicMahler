@@ -1,22 +1,20 @@
 # magicMahler
 
+**magicMahler** is a Python package for working with polytopes, their polar bodies, and Mahler volumes. It provides functionality for manipulating and visualizing convex polytopes, computing their Mahler volumes, and applying the Mahler sliding algorithm. The package also includes auxiliary functions for numerical optimization and gradient descent.
+
 ## Features
+- Define and manipulate convex polytopes.
+- Compute volumes, polar bodies, Mahler volumes, and isotropic constants.
+- Interactive visualization of polytopes and their polar bodies.
+- Perform gradient descent to find key points (e.g., Santalo points).
+- Implement Graham Scan for convex hull computation.
+- Support for Lp-Mahler volumes.
 
-- Compute volume of polygons
-- Compute the classical polar polytope
-- Compute the $L^p$-polars
-- Compute Mahler volumes
-- Compute the isotropic constant 
-- Graph polytopes
-- Find extreme points using Graham's scan in $n\log n$ time 
-- Visualize Graham's algorithm in real time
-- Run Mahler's algorithm in real time 
-- Generate symmetric or non-symmetric random polytopes
-- Compute the B-constant of the Bergman metric of the polytope
-- Graph Mahler volume, the isotropic constant, and the B-constant under sliding
+## Installation
 
-
-## Installation 
+Clone the repository and install the required packages using `pip`:
 
 ```bash
-pip install magicMahler
+git clone https://github.com/vmastr/magicMahler.git
+cd magicMahler
+pip install -r requirements.txt

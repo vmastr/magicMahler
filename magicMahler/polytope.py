@@ -41,6 +41,9 @@ class Polytope:
         plt.title('Polytope Plot')
         plt.show()
 
+    def update_vertices(self, new_vertices):
+        self.vertices = new_vertices
+
     def polar(self):
         """
         Compute the polar polytope.
@@ -60,6 +63,38 @@ class Polytope:
             polar_y = (xs[i] - xs[i + 1]) / L
             polar_polytope.append((polar_x, polar_y))
         return Polytope(polar_polytope)
+    
+    def polar_plot(self): 
+        # Create a figure and two subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))  # 1 row, 2 columns
+
+        # Body plot
+        vertices = self.vertices[:]
+        vertices.append(vertices[0])
+        xs, ys = zip(*vertices) #create lists of x and y values
+        ax1.plot(xs,ys) 
+        ax1.axhline(0, color='black', linewidth=0.5)  # Add x-axis
+        ax1.axvline(0, color='black', linewidth=0.5)  # Add y-axis
+        ax1.set_xlim(-2, 2)  # Adjust x-axis limits to zoom out
+        ax1.set_ylim(-2, 2)  # Adjust y-axis limits to zoom out
+        ax1.set_title('Convex body')
+
+        # Polar plot
+        vertices = self.polar().vertices[:]
+        vertices.append(vertices[0])
+        xs, ys = zip(*vertices)  # create lists of x and y values
+        ax2.plot(xs, ys)
+        ax2.axhline(0, color='black', linewidth=0.5)  # Add x-axis
+        ax2.axvline(0, color='black', linewidth=0.5)  # Add y-axis
+        ax1.set_xlim(-2, 2)  # Adjust x-axis limits to zoom out
+        ax1.set_ylim(-2, 2)  # Adjust y-axis limits to zoom out
+        ax2.set_title('Polar body')
+
+        # Adjust layout to prevent overlap
+        plt.tight_layout()
+
+        # Show the plots    
+        plt.show()
     
     def Mahler(self):    
         """
@@ -302,14 +337,14 @@ class Polytope:
 #     print("L1-Santalo point of simplex:", simplex.SantaloPoint(1))
 
 
-# Gradient descent by hand 
-simplex = Polytope([(0,0), (1,0), (0,1)])
-learning_rate = .0001
+# # Gradient descent by hand 
+# simplex = Polytope([(0,0), (1,0), (0,1)])
+# learning_rate = .0001
 
-def D(x,y): 
-    return simplex.translate(x,y).M(2)
+# def D(x,y): 
+#     return simplex.translate(x,y).M(2)
 
-gradient_descent(D, (.4, .35))
+# gradient_descent(D, (.4, .35))
 
 # x0, y0 = .4, .35
 # D_old = D(x0, y0) 
@@ -341,6 +376,7 @@ gradient_descent(D, (.4, .35))
 #     print(D_old, grad, x0, y0, D_new)    
 #     D_old = D_new      
 
-
+Pentagon = Polytope([(1, -1), (1, 1), (0, 3/2), (-1, 1), (-1, -1)])
+print(Pentagon.polar_plot())
 
  
