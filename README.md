@@ -18,3 +18,15 @@ Clone the repository and install the required packages using `pip`:
 git clone https://github.com/vmastr/magicMahler.git
 cd magicMahler
 pip install -r requirements.txt
+
+
+Make sure you have the required dependencies in requirements.txt. They should include: 
+
+- `numpy` 
+- `matplotlib`
+- `scipy`
+- `tqdm` 
+- `imageio` 
+
+
+## Usage
