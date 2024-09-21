@@ -6,7 +6,7 @@
 - Define and manipulate convex polytopes.
 - Compute volumes, polar bodies, Mahler volumes, and isotropic constants.
 - Interactive visualization of polytopes and their polar bodies.
-- Perform gradient descent to find key points (e.g., Santalo points).
+- Perform gradient descent to find key points (e.g., Lp-Santalo points).
 - Implement Graham Scan for convex hull computation.
 - Support for Lp-Mahler volumes.
 
