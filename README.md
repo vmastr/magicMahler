@@ -31,7 +31,7 @@ Make sure you have the required dependencies in requirements.txt. They should in
 
 ## Usage
 
-## 1. Defining the Polytope 
+### 1. Defining the Polytope 
 
 You can create a polytope by passing a list of counter-clockwise list of vertices to the `Polytope` class: 
 
