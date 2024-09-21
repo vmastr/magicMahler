@@ -30,3 +30,20 @@ Make sure you have the required dependencies in requirements.txt. They should in
 
 
 ## Usage
+
+## 1. Defining the Polytope 
+
+You can create a polytope by passing a list of counter-clockwise list of vertices to the `Polytope` class: 
+
+```bash 
+from magicMahler import Polytope
+
+# Define a polytope by specifying its vertices
+vertices = [(1, 1), (-1, 0), (-1, -1), (0, -1)]
+polytope = Polytope(vertices)
+
+# Compute the volume (area in 2D)
+volume = polytope.volume()
+print(f"Volume: {volume}")
+
+```
