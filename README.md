@@ -46,4 +46,45 @@ polytope = Polytope(vertices)
 volume = polytope.volume()
 print(f"Volume: {volume}")
 
+# Plot the polytope
+polytope.plot()
 ```
+
+### 2. Computing and plotting the Polar body
+
+You can compute and visualize the polar body of the polytope: 
+
+```bash 
+# Compute the polar body of the polytope
+polar_polytope = polytope.polar()
+
+# Plot both the original polytope and its polar
+polytope.polar_plot()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
