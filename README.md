@@ -62,11 +62,56 @@ polar_polytope = polytope.polar()
 polytope.polar_plot()
 ```
 
+### 3. Interactive plot with dragging 
+
+You can interactively drag the polytope and watch its polar update in real-time: 
+
+```bash 
+from magicMahler import update_plots
+
+# Initialize the polytope and use interactive dragging
+polytope = Polytope([(1, 1), (-1, 0), (-1, -1), (0, -1)])
+update_plots(polytope)
+```
+Note you have to double-click then drag. 
 
 
+### 4. Compute the Lp-Mahler volumes
 
+You can compute the classical Mahler volume and the Lp-Mahler volumes: 
 
+```bash
+# Compute the Mahler volume
+mahler_volume = polytope.Mahler()
+print(f"Mahler Volume: {mahler_volume}")
 
+# Compute the Lp-Mahler volume for p = 1
+Lp_mahler_volume = polytope.M(1)
+print(f"L1-Mahler Volume: {Lp_mahler_volume}")
+```
+
+### 5. Run the Graham scan algorithm 
+
+You can compute the convex hull of a set of points using the Graham scan algorithm: 
+
+```bash
+from magicMahler import graham_scan, Point
+
+# Define points
+points = [Point(0, 0), Point(1, 0.5), Point(2, 2), Point(2, 0), Point(0, 2)]
+
+# Compute the convex hull
+convex_hull = graham_scan(points)
+print(f"Convex Hull: {convex_hull}")
+```
+
+## Contributing 
+
+Contributions are welcome! If you find a bug or have a feature request, feel free to open an issue or submit a pull request. 
+
+## Contact
+
+For any questions, feel free to contact me at vmastr@umd.edu. 
 
 
 
