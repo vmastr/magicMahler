@@ -4,7 +4,7 @@
 
 ## Features
 - Define and manipulate convex polytopes.
-- Compute volumes, polar bodies, Mahler volumes, and isotropic constants.
+- Compute volumes, polar bodies, Mahler volumes, and the isotropic constant.
 - Interactive visualization of polytopes and their polar bodies.
 - Perform gradient descent to find key points (e.g., Lp-Santalo points).
 - Implement Graham Scan for convex hull computation.
@@ -62,7 +62,34 @@ polar_polytope = polytope.polar()
 polytope.polar_plot()
 ```
 
-### 3. Interactive plot with dragging 
+### 3. Compute the Barycenter (centroid) 
+
+You can compute the barycenter of a polytope:
+
+```bash 
+barycenter = polytope.barycenter()
+print(f"Barycenter: {barycenter}")
+```
+
+### 4. Compute the covariance matrix 
+
+You can compute the covariance matrix of a polytope: 
+
+```bash 
+cov_martix = polytope.Cov()
+print(f"Covariance matrix: \n{cov_matrix}")
+```
+
+### 5. Compute the isotropic constant 
+
+You can compute the isotropic constant of a polytope: 
+
+```bash 
+isotropic_constant = polytope.isotropic()
+print(f"Isotropic constant: {isotropic_constant}")
+```
+
+### 6. Interactive plot with dragging 
 
 You can interactively drag the polytope and watch its polar update in real-time: 
 
@@ -76,13 +103,13 @@ update_plots(polytope)
 Note you have to double-click then drag. 
 
 
-### 4. Compute the Lp-Mahler volumes
+### 7. Compute the Lp-Mahler volumes
 
 You can compute the classical Mahler volume and the Lp-Mahler volumes: 
 
 ```bash
 # Compute the Mahler volume
-mahler_volume = polytope.Mahler()
+mahler_volume = polytope.M()
 print(f"Mahler Volume: {mahler_volume}")
 
 # Compute the Lp-Mahler volume for p = 1
@@ -90,7 +117,21 @@ Lp_mahler_volume = polytope.M(1)
 print(f"L1-Mahler Volume: {Lp_mahler_volume}")
 ```
 
-### 5. Run the Graham scan algorithm 
+### 7. Find the Lp-Santalo points
+
+You can compute any Lp-Santalo point of the polytope via gradient descent: 
+
+```bash
+# Find the classical Santalo point
+santalo_point = polytope.SantaloPoint()
+print(f"Santalo point: {santalo_point}")
+
+# Find the L1 Santalo point
+L1_Santalo_point = polytope.SantaloPoint(1)
+print(f"L1 Santalo point: {L1_Santalo_point}")
+```
+
+### 9. Run the Graham scan algorithm 
 
 You can compute the convex hull of a set of points using the Graham scan algorithm: 
 
