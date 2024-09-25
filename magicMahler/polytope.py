@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 from scipy import integrate
 from auxiliary_functions import aux1, aux2, numerical_gradient, gradient_descent, safe_divide, double_integration 
 
@@ -42,6 +43,7 @@ class Polytope:
         plt.show()
 
     def update_vertices(self, new_vertices):
+        """Update the vertices of the polytope."""
         self.vertices = new_vertices
 
     def polar(self):
@@ -65,7 +67,7 @@ class Polytope:
         return Polytope(polar_polytope)
     
     def polar_plot(self): 
-        # Create a figure and two subplots
+        """Plot the polytope and its polar side by side."""
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))  # 1 row, 2 columns
 
         # Body plot
@@ -103,7 +105,7 @@ class Polytope:
         """
         return 2 * self.volume() * self.polar().volume()
     
-    def barycenter(self):
+    def barycenter(self, threshold=1e-6):
         """
         Compute the barycenter (centroid) of a convex polygon in 2D.
 
@@ -139,6 +141,10 @@ class Polytope:
         C_x /= (6 * A)
         C_y /= (6 * A)
 
+        # Round small values to zero if they are below the threshold
+        C_x = round(C_x) if abs(C_x-round(C_x)) < threshold else C_x
+        C_y = round(C_y) if abs(C_y-round(C_y)) < threshold else C_y
+
         return (C_x, C_y)
 
     def translate(self, x, y):
@@ -160,6 +166,15 @@ class Polytope:
 
 
     def SantaloPoint(self, p="inf"): 
+        """
+        Compute the Santaló point of the polytope using gradient descent.
+
+        Args:
+            p: The exponent for the Lp-Mahler volume, default is "inf" for classical Mahler volume.
+
+        Returns:
+            tuple: The coordinates of the Santaló point.
+        """
         # Step 1: Define the function M(p, P - (x, y))
         def F(x,y):
             return self.translate(x, y).M(p)
@@ -177,6 +192,7 @@ class Polytope:
         return result_x, result_y
 
     def safe_exph1(self, x, y):
+        """Helper function to compute the exponential L1-support function safely."""
         vertices = self.vertices[:]  # Make a copy of the vertices
         vertices.append(vertices[0])
         z = np.array([x, y])
@@ -313,70 +329,21 @@ class Polytope:
 
 
 # # Testing
-# if __name__ == "__main__":
-#     simplex = Polytope([(0,0), (1,0), (0,1)])
-#     triangle = Polytope([(1, 1), (-1, 0), (0, -1)])
-#     # print("Triangle Volume:", triangle.volume())
-#     # triangle.plot()
 
-#     square = Polytope([[1, 1], [-1, 1], [-1, -1], [1, -1]])
-#     # print("Square M(1):", square.M(1))
-#     # print("Square M(5):", square.M(5))
-#     # print("Square Mahler volume:", square.Mahler())
-#     # print("Square Mahler volume:", square.M("inf"), square.M())
-#     # print("Barycenter:", triangle.barycenter(), simplex.barycenter())
-#     # print("Covariance matrix:", triangle.Cov())
-#     # print("Isotropic constant:", simplex.isotropic(), square.isotropic())
-#     # print("Translated simplex:", simplex.translate(1/3,1/3).vertices)
-#     # print("M1 of translated square:", square.translate(1/2, 1/2).M(1))
-#     # print("M1 of the simplex:", simplex.translate(.3,.3).M(1))
-#     # print("Santalo point of triangle:", triangle.SantaloPoint())
-#     # print("Santalo point of simplex:", simplex.SantaloPoint())
-#     # print("L1-Santalo point of translated square:", square.translate(1,1).SantaloPoint(1))
-#     # print("L1-Santalo point of triangle:", triangle.translate(.5,.5).SantaloPoint(1))
-#     print("L1-Santalo point of simplex:", simplex.SantaloPoint(1))
+# Pentagon = Polytope([(1, -1), (1, 1), (0, 3/2), (-1, 1), (-1, -1)])
 
+# def F(p): 
+#     return Pentagon.SantaloPoint(p)[1]
 
-# # Gradient descent by hand 
-# simplex = Polytope([(0,0), (1,0), (0,1)])
-# learning_rate = .0001
+# p_values = np.arange(10, 101, 10)
+# F_values = [F(p) for p in p_values]
 
-# def D(x,y): 
-#     return simplex.translate(x,y).M(2)
+# plt.plot(p_values, F_values, marker='o', linestyle='-', color='b')
+# plt.xlabel('p')
+# plt.ylabel('Pentagon.SantaloPoint(p)[1]')
+# plt.title('y-coordinate of the Lp-Santalo point of a pentagon')
+# plt.grid(True)
+# plt.show()
 
-# gradient_descent(D, (.4, .35))
-
-# x0, y0 = .4, .35
-# D_old = D(x0, y0) 
-# grad = numerical_gradient(D, x0, y0)
-# number_of_iterations = 0 
-
-
-# while np.sqrt(grad[0]**2 + grad[1]**2) > 1e-3 and number_of_iterations < 1e3: 
-#     number_of_iterations += 1
-
-#     x0 -= learning_rate * grad[0]
-#     y0 -= learning_rate * grad[1]
-
-#     grad = numerical_gradient(D, x0, y0)
-
-# print("Number of iterations:", number_of_iterations)
-# print("Minimum attained at: ", (x0, y0))
-# print("Gradient at  that point: ", grad)
-# print("Minimum value: ", D(x0, y0))
-
-    
-
-# for i in range(100): 
-#     grad = numerical_gradient(D, x0, y0)
-#     x0 -= learning_rate * grad[0]
-#     y0 -= learning_rate * grad[1]
-
-#     D_new = D(x0, y0)
-#     print(D_old, grad, x0, y0, D_new)    
-#     D_old = D_new      
-
-Pentagon = Polytope([(1, -1), (1, 1), (0, 3/2), (-1, 1), (-1, -1)])
-print(Pentagon.polar_plot())
-
- 
+square = Polytope([(1, 1), (-1, 1), (-1, -1), (1, -1)])
+print(square.polar().vertices)
